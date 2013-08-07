@@ -1,7 +1,6 @@
 module Flattt
   module Renderers
-    # This pattern was inspired by a presentation
-    # by _zzak
+    # This pattern was inspired by a presentation by _zzak
     class Markdown
       def initialize(markdown_file)
         @text = File.read markdown_file
@@ -13,6 +12,7 @@ module Flattt
         @formatter = RDoc::Markup::ToHtml.new(@options, nil)
         @parser.parse(@text).accept(@formatter)
       end
+      alias :render :to_html
     end
   end
 end

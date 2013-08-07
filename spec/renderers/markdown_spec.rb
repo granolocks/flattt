@@ -12,7 +12,9 @@ describe "Renderers" do
         #TODO this test sucks and this rendered HTML sucks worse...
         #  <h1 id="label-Header">Header<span><a href="#label-Header">&para;</a> <a href="#documentation">&uarr;</a></span></h1>
         @markdown.to_html.scan(/<h1/).size>0
+        @markdown.render.scan(/<h1/).size>0
       ).should == true
+      File.delete tmp_file
     end
   end
 end
