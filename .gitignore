@@ -3,6 +3,7 @@
 .rvmrc
 .bundle
 .config
+.sass-cache
 coverage
 InstalledFiles
 lib/bundler/man
