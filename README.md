@@ -11,6 +11,7 @@ I am keeping it simple by limiting the formats of the supported templates initia
 ```sh
 
 # contents of lib directory
+# generated with :r!tree lib/
 
 lib
 ├── flattt
