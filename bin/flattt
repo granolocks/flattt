@@ -27,6 +27,34 @@ flatt [-h|--help]
 HELP_TEXT
 
 CURRENT_DIRECTORY = Dir.pwd
+REQUIRED_DIRS = %w{ source source/pages 
+  source/posts source/scripts source/styles 
+  site site/posts site/js site/styles templates }
+
+def build_new_project name
+  project_dir = File.join(CURRENT_DIRECTORY, name)
+  puts "Creating new flattt project in #{project_dir}"
+
+  if Dir.exists? project_dir
+    puts "Looks like a directory already exists in #{ project_dir} "
+    puts "Please choose a different name."
+    exit
+  end
+
+  Dir.mkdir project_dir
+  dirs = REQUIRED_DIRS.map{|dir| File.join( project_dir, dir ) }
+  puts "Creating additional directories:"
+  dirs.each do |dir|
+    puts "\t-> #{dir}"
+    Dir.mkdir dir
+  end
+
+  puts "Creating Gemfile"
+  # TODO not actually on rubygems...
+  default_gemfile = "source 'https://rubygems.org'\n\ngem 'flattt'"
+  target_gemfile  =  File.join project_dir, "Gemfile"
+  File.write(target_gemfile, default_gemfile) 
+end
 
 # Goal
 opts = Slop.parse do
@@ -39,7 +67,12 @@ opts = Slop.parse do
 
   command 'new' do 
     run do |opts, args|
-      puts "NEW - PENDING"
+      name = args[0] || nil
+      if name
+        build_new_project name
+      else
+        puts HELP_TEXT
+      end
     end
   end
 
@@ -55,3 +88,4 @@ opts = Slop.parse do
     end 
   end
 end
+
