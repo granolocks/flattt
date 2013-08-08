@@ -9,20 +9,23 @@ I am keeping it simple by limiting the formats of the supported templates initia
 ## Commands
 Once this is installed as a gem you have a few options you can run with the flattt command:
 
+#### new
 ```sh
 flattt new [project_name]
 ```
 Build a new flattt project in a directory which matches your project name
 
+#### Generate
 ```sh
 flattt generate [page|post|coffee|style]
 ```
 Generate CMS Sources files for a page, post, coffeescript or scss stylesheet
 
+#### Build
+Convert CMS Source files to flat files which can be served from any static web server.
 ```sh
 flattt build [site|html|pages|posts|assets|stylesheets|js]
 ```
-Convert CMS Source files to flat files which can be served from any static web server.
 * site: Build entire site structure 
 * html: Build all HTML - pages & posts
 * pages: Build HTML for pages only
@@ -31,15 +34,14 @@ Convert CMS Source files to flat files which can be served from any static web s
 * stylesheets: Build CSS
 * js: Build Js
 
+#### Help
+Print help message
 ```sh
 flattt [-h|--help]
- -- Print help message
- ```
+```
 
 ## Code Guide
-
 ```sh
-
 # contents of lib directory
 # generated with :r!tree lib/
 
@@ -63,8 +65,6 @@ lib/
 │       ├── init.rb
 │       └── markdown.rb
 └── flattt.rb
-
-5 directories, 14 files
 ```
 
 ### Builders
