@@ -6,6 +6,36 @@ I have taken some cues from projects like [jekyll](http://jekyllrb.com/) and [st
 
 I am keeping it simple by limiting the formats of the supported templates initially around what I want to use for my own site.
 
+## Commands
+Once this is installed as a gem you have a few options you can run with the flattt command:
+
+```sh
+flattt new [project_name]
+```
+Build a new flatt project in a directory which matches your project name
+
+```sh
+flattt generate [page|post|coffee|style]
+```
+Generate CMS Sources files for a page, post, coffeescript or scss stylesheet
+
+```sh
+flattt build [site|html|pages|posts|assets|stylesheets|js]
+```
+Convert CMS Source files to flat files which can be served from any static web server.
+* site: Build entire site structure 
+* html: Build all HTML - pages & posts
+* pages: Build HTML for pages only
+* posts: Build HTML for posts only
+* assets: Build all assets - CSS & Js
+* stylesheets: Build CSS
+* js: Build Js
+
+```sh
+flatt [-h|--help]
+ -- Print help message
+ ```
+
 ## Code Guide
 
 ```sh
@@ -13,7 +43,7 @@ I am keeping it simple by limiting the formats of the supported templates initia
 # contents of lib directory
 # generated with :r!tree lib/
 
-lib
+lib/
 ├── flattt
 │   ├── builders
 │   │   ├── base.rb
@@ -34,6 +64,7 @@ lib
 │       └── markdown.rb
 └── flattt.rb
 
+5 directories, 14 files
 ```
 
 ### Builders
