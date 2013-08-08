@@ -12,7 +12,7 @@ Once this is installed as a gem you have a few options you can run with the flat
 ```sh
 flattt new [project_name]
 ```
-Build a new flatt project in a directory which matches your project name
+Build a new flattt project in a directory which matches your project name
 
 ```sh
 flattt generate [page|post|coffee|style]
@@ -32,7 +32,7 @@ Convert CMS Source files to flat files which can be served from any static web s
 * js: Build Js
 
 ```sh
-flatt [-h|--help]
+flattt [-h|--help]
  -- Print help message
  ```
 
