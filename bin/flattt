@@ -31,32 +31,38 @@ REQUIRED_DIRS = %w{ source source/pages
   source/posts source/scripts source/styles 
   site site/posts site/js site/styles templates }
 
+def verify_or_create_required_dirs(root_directory)
+  REQUIRED_DIRS.each do |dir| 
+    path = File.join(root_directory,dir)
+    verify_or_create_dir(path) 
+  end
+end
+
+def verify_or_create_dir(dir_path)
+  puts "[+] creating #{dir_path}"
+  Dir.mkdir dir_path
+end
+
 def build_new_project name
   project_dir = File.join(CURRENT_DIRECTORY, name)
-  puts "Creating new flattt project in #{project_dir}"
+  puts "[+] Creating new flattt project in #{project_dir}"
 
   if Dir.exists? project_dir
-    puts "Looks like a directory already exists in #{ project_dir} "
-    puts "Please choose a different name."
+    puts "[-] Looks like a directory already exists in #{ project_dir} "
+    puts "[-] Please choose a different name."
     exit
   end
 
   Dir.mkdir project_dir
-  dirs = REQUIRED_DIRS.map{|dir| File.join( project_dir, dir ) }
-  puts "Creating additional directories:"
-  dirs.each do |dir|
-    puts "\t-> #{dir}"
-    Dir.mkdir dir
-  end
+  puts "[+] Creating additional directories:"
+  verify_or_create_required_dirs(project_dir)
 
-  puts "Creating Gemfile"
-  # TODO not actually on rubygems...
-  default_gemfile = "source 'https://rubygems.org'\n\ngem 'flattt'"
-  target_gemfile  =  File.join project_dir, "Gemfile"
+  puts "[+] Creating Gemfile"
+  default_gemfile = "source 'https://rubygems.org'\n\ngem 'flattt', github: 'granolocks/flattt', branch: 'master'"
+  target_gemfile  =  File.join(project_dir, "Gemfile")
   File.write(target_gemfile, default_gemfile) 
 end
 
-# Goal
 opts = Slop.parse do
   banner "[Usage:] flattt -h for more information."
 
@@ -78,13 +84,13 @@ opts = Slop.parse do
 
   command 'generate' do 
     run do |opts, args|
-      puts "GENERATE - PENDING"
+      puts "[-] GENERATE - PENDING"
     end
   end
    
   command 'build' do 
     run do |opts, args|
-      puts "BUILD - PENDING"
+      puts "[-] BUILD - PENDING"
     end 
   end
 end
