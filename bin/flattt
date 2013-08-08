@@ -2,6 +2,7 @@
 
 require 'flattt'
 require 'slop'
+require 'fileutils'
 
 include Flattt::Generators
 include Flattt::Builders
@@ -114,6 +115,13 @@ def this_is_flattt_root?
   !(required_paths.map{|path| Dir.exists?(path) }.include?(false))
 end
 
+def string_to_file_path(str)
+  str.downcase
+     .split(' ')
+     .join('_')
+     .gsub(/[^a-z0-9_\-]/,'')[0..63]
+end
+
 def build_stylesheets
   stylesheets = filepaths_in_dir(PATHS[:source][:styles], "scss")
   stylesheets.each do |src_path|
@@ -190,11 +198,38 @@ opts = Slop.parse do
           post.generate!
           puts "[+] Done :)\n"
         when 'coffee'
-          # coffee_gen
-          puts "[-] Not implemented.... :C"
+          # post_gen
+          puts "Enter script title: "
+          title = $stdin.gets.chomp
+          script_title = string_to_file_path(title) + ".js.coffee" 
+          script_path = File.join(PATHS[:source][:scripts], script_title)
+          
+          puts "[+] Creating empty coffee script..."
+          puts "\t -> #{script_path}"
+
+          if File.exists? script_path
+            puts "[-] Script already exists. Exiting.\n"
+            exit
+          end
+
+          FileUtils.touch(script_path)
+          puts "[+] Done :)\n"
         when 'style'
-          # coffee_gen
-          puts "[-] Not implemented.... :C"
+          puts "Enter stylesheet title: "
+          title = $stdin.gets.chomp
+          stylesheet_title = string_to_file_path(title) + ".css.scss" 
+          stylesheet_path = File.join(PATHS[:source][:styles], stylesheet_title)
+          
+          puts "[+] Creating empty scss stylesheet..."
+          puts "\t -> #{stylesheet_path}"
+
+          if File.exists? stylesheet_path
+            puts "[-] Stylesheet already exists. Exiting.\n"
+            exit
+          end
+
+          FileUtils.touch(stylesheet_path)
+          puts "[+] Done :)\n"
         end
       else
         puts HELP_TEXT
