@@ -135,6 +135,7 @@ def build_js
 end
 
 def build_assets
+  puts "[+] Building all assets."
   build_stylesheets
   build_js
 end
