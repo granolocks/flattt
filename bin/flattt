@@ -3,7 +3,10 @@
 require 'flattt'
 require 'slop'
 
-BANNER =<<HELP_TEXT
+include Flattt::Generators
+include Flattt::Builders
+
+HELP_TEXT =<<HELP
 Usage:
 
 flattt new [project_name]
@@ -24,16 +27,53 @@ flattt build [site|html|pages|posts|assets|stylesheets|js]
 
 flatt [-h|--help]
  -- Print this message
-HELP_TEXT
+HELP
 
 CURRENT_DIRECTORY = Dir.pwd
 REQUIRED_DIRS = %w{ source source/pages 
   source/posts source/scripts source/styles 
-  site site/posts site/js site/styles templates }
+  site site/posts site/js site/styles 
+  layouts }
 
-def verify_or_create_required_dirs(root_directory)
+# This is some frigteningly dark vooodoo which basically 
+# just converts REQUIRED_DIRS into a nested hash of directories and paths
+def required_paths_hash
+  REQUIRED_DIRS.inject({}) do |coll, path|
+    nested_path = path.split "/"
+    full_path = File.join(CURRENT_DIRECTORY,path)
+
+    # :C This could be written so much nicer... 
+    # Must be getting sleepy
+    if nested_path.size == 1 # meaning it is a directory
+      coll[path.to_sym] = full_path
+    else
+      # for readbility maybe?
+      p0 = nested_path[0].to_sym
+      p1 = nested_path[1].to_sym
+      if coll[p0].class == String
+        coll[p0] = {}
+      end
+      coll[p0][p1] = full_path
+    end
+    coll # <3 inject() but should probably use each_with_object()
+  end
+end
+
+PATHS = required_paths_hash
+
+def filepaths_in_dir(dir,file_extension)
+  Dir.new(dir).entries
+    .select!{|e| e.scan(/\.#{file_extension}$/).size > 0}
+    .map{|file| File.join(dir, file)}
+end
+
+def required_paths
+  REQUIRED_DIRS.map{|dir|File.join(CURRENT_DIRECTORY,dir)}
+end
+
+def verify_or_create_required_dirs(flattt_root=required_paths)
   REQUIRED_DIRS.each do |dir| 
-    path = File.join(root_directory,dir)
+    path = File.join(flattt_root,dir)
     verify_or_create_dir(path) 
   end
 end
@@ -63,6 +103,42 @@ def build_new_project name
   File.write(target_gemfile, default_gemfile) 
 end
 
+def verify_flattt_root
+  unless this_is_flattt_root?
+    puts "[-] Please run this command from the root of a flattt project"
+    exit
+  end
+end
+
+def this_is_flattt_root?
+  !(required_paths.map{|path| Dir.exists?(path) }.include?(false))
+end
+
+def build_stylesheets
+  stylesheets = filepaths_in_dir(PATHS[:source][:styles], "scss")
+  stylesheets.each do |src_path|
+    builder = ScssToCss.new( src_path, PATHS[:site][:styles])
+    puts "[+] Building stylesheet from #{src_path }"
+    puts "\t -> #{builder.output_file_path}"
+    builder.build!
+  end
+end
+
+def build_js
+  scripts = filepaths_in_dir(PATHS[:source][:scripts], "coffee")
+  scripts.each do |src_path|
+    builder = CoffeeToJs.new( src_path, PATHS[:site][:js])
+    puts "[+] Building Javascript from #{src_path }"
+    puts "\t -> #{builder.output_file_path}"
+    builder.build!
+  end
+end
+
+def build_assets
+  build_stylesheets
+  build_js
+end
+
 opts = Slop.parse do
   banner "[Usage:] flattt -h for more information."
 
@@ -84,13 +160,71 @@ opts = Slop.parse do
 
   command 'generate' do 
     run do |opts, args|
-      puts "[-] GENERATE - PENDING"
+      verify_flattt_root
+      gen_type = args[0] || nil
+      if gen_type && %w{ page post coffee style }.include?(gen_type)
+        paths = required_paths_hash
+        # generate ALL the things!
+        case gen_type
+        when 'page'
+          # page_gen
+          puts "Enter page title: "
+          title = $stdin.gets.chomp
+
+          puts "[+] Creating page '#{title}'"
+          page = Page.new(title, paths[:source][:pages])
+
+          puts "[+] Building page....."
+          page.generate!
+          puts "[+] done :)"
+        when 'post'
+          # post_gen
+          puts "Enter post title: "
+          title = $stdin.gets.chomp
+          
+          puts "[+] Creating post '#{title}'"
+          post = Post.new(title, paths[:source][:posts])
+
+          puts "[+] Building post...."
+          post.generate!
+          puts "[+] Done :)\n"
+        when 'coffee'
+          # coffee_gen
+          puts "[-] Not implemented.... :C"
+        when 'style'
+          # coffee_gen
+          puts "[-] Not implemented.... :C"
+        end
+      else
+        puts HELP_TEXT
+      end
     end
   end
    
   command 'build' do 
     run do |opts, args|
-      puts "[-] BUILD - PENDING"
+      verify_flattt_root
+      build_type = args[0] || nil
+      if build_type && %w{ site html pages posts assets stylesheets js }.include?(build_type)
+        case build_type
+        when "site"
+          puts "[-] Not implemented.... :C"
+        when "html"
+          puts "[-] Not implemented.... :C"
+        when "pages"
+          puts "[-] Not implemented.... :C"
+        when "posts"
+          puts "[-] Not implemented.... :C"
+        when "assets"
+          build_assets
+        when "stylesheets"
+          build_stylesheets
+        when "js"
+          build_js 
+        end
+      else
+        puts HELP_TEXT
+      end
     end 
   end
 end
