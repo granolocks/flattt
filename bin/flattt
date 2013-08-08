@@ -26,7 +26,7 @@ flattt build [site|html|pages|posts|assets|stylesheets|js]
     stylesheets: Build CSS
     js: Build Js
 
-flatt [-h|--help]
+flattt [-h|--help]
  -- Print this message
 HELP
 
