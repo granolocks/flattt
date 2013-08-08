@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+
+require 'flattt'
+require 'slop'
+
+BANNER =<<HELP_TEXT
+Usage:
+
+flattt new [project_name]
+  -- Build a new flatt project in a directory which matches your project name
+
+flattt generate [page|post|coffee|style] 
+  -- Generate CMS Sources files for a page, post, coffeescript or scss stylesheet
+
+flattt build [site|html|pages|posts|assets|stylesheets|js]
+ -- Convert CMS Source files to flat files which can be served from any static web server.
+    site: Build entire site structure 
+    html: Build all HTML - pages & posts
+    pages: Build HTML for pages only
+    posts: Build HTML for posts only
+    assets: Build all assets - CSS & Js
+    stylesheets: Build CSS
+    js: Build Js
+
+flatt [-h|--help]
+ -- Print this message
+HELP_TEXT
+
+CURRENT_DIRECTORY = Dir.pwd
+
+# Goal
+opts = Slop.parse do
+  banner "[Usage:] flattt -h for more information."
+
+  on '-h', '--help', 'Print the Usage' do
+    #puts "'Ere I am, J. H., the ghost in the machine."
+    puts HELP_TEXT
+  end
+
+  command 'new' do 
+    run do |opts, args|
+      puts "NEW - PENDING"
+    end
+  end
+
+  command 'generate' do 
+    run do |opts, args|
+      puts "GENERATE - PENDING"
+    end
+  end
+   
+  command 'build' do 
+    run do |opts, args|
+      puts "BUILD - PENDING"
+    end 
+  end
+end
