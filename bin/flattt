@@ -1,49 +1,27 @@
 #!/usr/bin/env ruby
 
+
 require 'flattt'
 require 'slop'
 require 'fileutils'
 
-include Flattt::Generators
-include Flattt::Builders
-
-HELP_TEXT =<<HELP
-Usage:
-
-flattt new [project_name]
-  -- Build a new flatt project in a directory which matches your project name
-
-flattt generate [page|post|coffee|style] 
-  -- Generate CMS Sources files for a page, post, coffeescript or scss stylesheet
-
-flattt build [site|html|pages|posts|assets|stylesheets|js]
- -- Convert CMS Source files to flat files which can be served from any static web server.
-    site: Build entire site structure 
-    html: Build all HTML - pages & posts
-    pages: Build HTML for pages only
-    posts: Build HTML for posts only
-    assets: Build all assets - CSS & Js
-    stylesheets: Build CSS
-    js: Build Js
-
-flattt [-h|--help]
- -- Print this message
-HELP
-
 CURRENT_DIRECTORY = Dir.pwd
-REQUIRED_DIRS = %w{ source source/pages 
-  source/posts source/scripts source/styles 
-  site site/posts site/js site/styles 
-  layouts }
 
-# This is some frigteningly dark vooodoo which basically 
+REQUIRED_DIRS = %w{
+                    source source/pages
+                    source/posts source/scripts source/styles
+                    site site/pages site/posts site/js site/styles
+                    layouts
+                  }
+
+# This is some frigteningly dark vooodoo which basically
 # just converts REQUIRED_DIRS into a nested hash of directories and paths
 def required_paths_hash
-  REQUIRED_DIRS.inject({}) do |coll, path|
+  output = REQUIRED_DIRS.inject({}) do |coll, path|
     nested_path = path.split "/"
     full_path = File.join(CURRENT_DIRECTORY,path)
 
-    # :C This could be written so much nicer... 
+    # :C This could be written so much nicer...
     # Must be getting sleepy
     if nested_path.size == 1 # meaning it is a directory
       coll[path.to_sym] = full_path
@@ -58,95 +36,21 @@ def required_paths_hash
     end
     coll # <3 inject() but should probably use each_with_object()
   end
-end
 
+  # keep pages @ site root >:C
+  output[:site][:pages] = File.join(CURRENT_DIRECTORY,"site")
+  return output
+end
 PATHS = required_paths_hash
 
-def filepaths_in_dir(dir,file_extension)
-  Dir.new(dir).entries
-    .select!{|e| e.scan(/\.#{file_extension}$/).size > 0}
-    .map{|file| File.join(dir, file)}
-end
+require File.join(File.expand_path('..',__FILE__),'templates.rb')
+require File.join(File.expand_path('..',__FILE__),'helpers.rb')
 
-def required_paths
-  REQUIRED_DIRS.map{|dir|File.join(CURRENT_DIRECTORY,dir)}
-end
+include Flattt::Bin::Helpers
 
-def verify_or_create_required_dirs(flattt_root=required_paths)
-  REQUIRED_DIRS.each do |dir| 
-    path = File.join(flattt_root,dir)
-    verify_or_create_dir(path) 
-  end
-end
-
-def verify_or_create_dir(dir_path)
-  puts "[+] creating #{dir_path}"
-  Dir.mkdir dir_path
-end
-
-def build_new_project name
-  project_dir = File.join(CURRENT_DIRECTORY, name)
-  puts "[+] Creating new flattt project in #{project_dir}"
-
-  if Dir.exists? project_dir
-    puts "[-] Looks like a directory already exists in #{ project_dir} "
-    puts "[-] Please choose a different name."
-    exit
-  end
-
-  Dir.mkdir project_dir
-  puts "[+] Creating additional directories:"
-  verify_or_create_required_dirs(project_dir)
-
-  puts "[+] Creating Gemfile"
-  default_gemfile = "source 'https://rubygems.org'\n\ngem 'flattt', github: 'granolocks/flattt', branch: 'master'"
-  target_gemfile  =  File.join(project_dir, "Gemfile")
-  File.write(target_gemfile, default_gemfile) 
-end
-
-def verify_flattt_root
-  unless this_is_flattt_root?
-    puts "[-] Please run this command from the root of a flattt project"
-    exit
-  end
-end
-
-def this_is_flattt_root?
-  !(required_paths.map{|path| Dir.exists?(path) }.include?(false))
-end
-
-def string_to_file_path(str)
-  str.downcase
-     .split(' ')
-     .join('_')
-     .gsub(/[^a-z0-9_\-]/,'')[0..63]
-end
-
-def build_stylesheets
-  stylesheets = filepaths_in_dir(PATHS[:source][:styles], "scss")
-  stylesheets.each do |src_path|
-    builder = ScssToCss.new( src_path, PATHS[:site][:styles])
-    puts "[+] Building stylesheet from #{src_path }"
-    puts "\t -> #{builder.output_file_path}"
-    builder.build!
-  end
-end
-
-def build_js
-  scripts = filepaths_in_dir(PATHS[:source][:scripts], "coffee")
-  scripts.each do |src_path|
-    builder = CoffeeToJs.new( src_path, PATHS[:site][:js])
-    puts "[+] Building Javascript from #{src_path }"
-    puts "\t -> #{builder.output_file_path}"
-    builder.build!
-  end
-end
-
-def build_assets
-  puts "[+] Building all assets."
-  build_stylesheets
-  build_js
-end
+include Flattt::Generators
+include Flattt::Builders
+include Flattt::Renderers
 
 opts = Slop.parse do
   banner "[Usage:] flattt -h for more information."
@@ -244,13 +148,13 @@ opts = Slop.parse do
       if build_type && %w{ site html pages posts assets stylesheets js }.include?(build_type)
         case build_type
         when "site"
-          puts "[-] Not implemented.... :C"
+          build_site
         when "html"
-          puts "[-] Not implemented.... :C"
+          build_html
         when "pages"
-          puts "[-] Not implemented.... :C"
+          build_pages
         when "posts"
-          puts "[-] Not implemented.... :C"
+          build_posts
         when "assets"
           build_assets
         when "stylesheets"
@@ -264,4 +168,3 @@ opts = Slop.parse do
     end 
   end
 end
-
