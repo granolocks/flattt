@@ -113,7 +113,7 @@ module Flattt
       end
 
       def output_html_from(source_path,directory,layout=site_layout)
-        full_path = File.join(PATHS[:source][:pages], directory)
+        full_path = File.join(source_path, directory)
         erb_options = load_yaml_from(full_path)
         erb_options[:content] = generate_html_from(full_path)
         build_html_from_erb(layout,erb_options)
@@ -129,14 +129,23 @@ module Flattt
           unless Dir.exists? target_dir
             Dir.mkdir target_dir
           end
-          target_file = directory == 'index' ? File.join(PATHS[:site], 'index.html') : File.join(target_dir, 'index.html')
+          target_file = directory == 'index' ? File.join(PATHS[:site][:pages], 'index.html') : File.join(target_dir, 'index.html')
           File.write(target_file, html)
         end
       end
 
       def build_posts
         puts "[+] Building all posts."
-        puts "[-] Not implemented.... :C"
+        # get a list of all posts in the posts source directory of the project
+        sub_entries_of(PATHS[:source][:posts]).each do |directory|
+          html = output_html_from(PATHS[:source][:posts], directory)
+          target_dir = File.join(PATHS[:site][:posts], directory)
+          unless Dir.exists? target_dir
+            Dir.mkdir target_dir
+          end
+          target_file = File.join(target_dir, 'index.html')
+          File.write(target_file, html)
+        end
       end
 
       def build_assets

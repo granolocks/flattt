@@ -41,6 +41,7 @@ def required_paths_hash
   output[:site][:pages] = File.join(CURRENT_DIRECTORY,"site")
   return output
 end
+
 PATHS = required_paths_hash
 
 require File.join(File.expand_path('..',__FILE__),'templates.rb')

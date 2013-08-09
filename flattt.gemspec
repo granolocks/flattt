@@ -1,8 +1,8 @@
 require 'rake'
 Gem::Specification.new do |s|
   s.name        = 'flattt'
-  s.version     = '0.0.0'
-  s.date        = '2013-08-07'
+  s.version     = '0.0.1'
+  s.date        = '2013-08-09'
   s.summary     = "Flattt "
   s.description = "A simple static site generator"
   s.authors     = ["Gabe Koss"]
